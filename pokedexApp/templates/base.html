@@ -1,0 +1,228 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no,
+      initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{% static 'css/pace-theme-minimal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css'
+      integrity='sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA=='
+      crossorigin='anonymous'/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+      rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    {% block style %}{% endblock %}
+    {% block title %} {% endblock %}
+</head>
+
+<body >
+
+  <div class="container">
+
+    <form action="{% url 'pg_search' %}">
+        <div class="container_title">
+            <h1 class="title "> P<img src="https://img.icons8.com/color/96/null/pokeball-2.png" style="width:50px;"/>keDex </h1>
+        </div>
+      <div class="filter-container">
+        <input type="search"
+                class="filter"
+                id="form-busca"
+                name="term"
+                value="{{ request.GET.term }}"
+                placeholder="Type the pokemon's name or id.."
+                autocomplete="off"/>
+
+        <div class="btnGroup">
+          <button class="btn btn-search" data-js="btnSearchPokemon" onclick="search_input_load()">
+              <i class="search fas fa-search"></i>
+              <i class="spinner fas fa-spinner"></i>
+          </button>
+          <a href="javascript:void(0)" class="btn btn-type" data-js="btnType" onclick="show_hide_types()">
+            <i class="type fas fa-filter"></i>
+         </a>
+          <a href="/" class="btn btn-all" data-js="btnHome" onclick="go_to_home()">
+            <i class="home fas fa-home"></i>
+            <i class="spinner fas fa-spinner"></i>
+          </a>
+        </div>
+
+        {% block pokemons_found %} {% endblock %}
+
+      </div>
+    </form>
+
+    <div class="container_types inactive" data-js="types_container">
+      <p class="title_types">Select a type:</p>
+      <ul class="types">
+        <a href="{% url 'pg_type' %}?id=7" onclick="load_pokemon()">Bug</a>
+        <a href="{% url 'pg_type' %}?id=17" onclick="load_pokemon()">Dark</a>
+        <a href="{% url 'pg_type' %}?id=16" onclick="load_pokemon()">Dragon</a>
+        <a href="{% url 'pg_type' %}?id=13" onclick="load_pokemon()">Electric</a>
+        <a href="{% url 'pg_type' %}?id=18" onclick="load_pokemon()">Fairy</a>
+        <a href="{% url 'pg_type' %}?id=2" onclick="load_pokemon()">Fighting</a>
+        <a href="{% url 'pg_type' %}?id=10" onclick="load_pokemon()">Fire</a>
+        <a href="{% url 'pg_type' %}?id=3" onclick="load_pokemon()">Flying</a>
+        <a href="{% url 'pg_type' %}?id=8" onclick="load_pokemon()">Ghost</a>
+        <a href="{% url 'pg_type' %}?id=12" onclick="load_pokemon()">Grass</a>
+        <a href="{% url 'pg_type' %}?id=5" onclick="load_pokemon()">Ground</a>
+        <a href="{% url 'pg_type' %}?id=15" onclick="load_pokemon()">Ice</a>
+        <a href="{% url 'pg_type' %}?id=1" onclick="load_pokemon()">Normal</a>
+        <a href="{% url 'pg_type' %}?id=4" onclick="load_pokemon()">Poison</a>
+        <a href="{% url 'pg_type' %}?id=14" onclick="load_pokemon()">Psychic</a>
+        <a href="{% url 'pg_type' %}?id=6" onclick="load_pokemon()">Rock</a>
+        <a href="{% url 'pg_type' %}?id=9" onclick="load_pokemon()">Steel</a>
+        <a href="{% url 'pg_type' %}?id=11" onclick="load_pokemon()">Water</a>
+      </ul>
+    </div>
+
+    {% block container %}
+
+      <ul class="pokemons-grid ">
+        {% if pokemons %}
+          {% if pokemonsList.paginator.count <= 2 %}
+            {% for pokemon in pokemons %}
+              <a href="{% url 'pg_pokemon' %}?pokemonID={{pokemon.id}}"
+                onclick="load_pokemon()">
+                <li class="card unique {{ pokemon.types.0.type.name }}">
+                  <p class="card-number">N° {{ pokemon.id }}</p>
+                  <img class="card-image" src="{{ pokemon.img }}" alt="{{ pokemon.name }}">
+                  <h2 class="card-title">{{ pokemon.name }} </h2>
+                  <p class="card-subtitle">
+                    {{ pokemon.types_string }}
+                  </p>
+                </li>
+              </a>
+            {% endfor %}
+          {% elif pokemonsList.paginator.count > 2 %}
+            {% for pokemon in pokemons %}
+              <a href="{% url 'pg_pokemon' %}?pokemonID={{pokemon.id}}"
+                onclick="load_pokemon()">
+                <li class="card {{ pokemon.types.0.type.name }}">
+                  <p class="card-number">N° {{ pokemon.id }}</p>
+                  <img class="card-image" src="{{ pokemon.img }}" alt="{{ pokemon.name }}">
+                  <h2 class="card-title">{{ pokemon.name }} </h2>
+                  <p class="card-subtitle">
+                    {{ pokemon.types_string }}
+                  </p>
+                </li>
+              </a>
+            {% endfor %}
+          {% endif %}
+
+
+        {% elif not pokemons %}
+          <div class="pokemon-not-found active" data-js="pokemon-not-found">
+            <a href="/" onclick="load_page()" class="not-found-close" data-js="not-found-close"> <i class="fa fa-spinner" aria-hidden="true"></i> </a>
+            <p class="not-found-message">Pokemon not found !</p>
+          </div>
+        {% endif %}
+      </ul>
+
+      {% endblock %}
+
+
+      {% block pagination %}
+        {% if pokemonsList.paginator.count > 12 %}
+          <div class="pagination">
+            <span class="step-links">
+                {% if pokemonsList.has_previous %}
+                    <a class="btn" onclick="load_page()" href="?page=1">&laquo;</a>
+                    <a class="btn" onclick="load_page()" href="?page={{ pokemonsList.previous_page_number }}">&lsaquo;</a>
+                {% endif %}
+
+                <span class="current">
+                    {{ pokemonsList.number }} de {{ pokemonsList.paginator.num_pages }}
+                </span>
+
+                {% if pokemonsList.has_next %}
+                    <a class="btn" onclick="load_page()" href="?page={{ pokemonsList.next_page_number }}">&rsaquo;</a>
+                    <a class="btn" onclick="load_page()" href="?page={{ pokemonsList.paginator.num_pages }}">&raquo;</a>
+                {% endif %}
+            </span>
+          </div>
+        {% endif %}
+      {% endblock %}
+
+
+  </div>
+
+
+  <div class="loader-general">
+    <div class="loader-container" data-js="loader">
+      <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      width="40px" height="50px" viewBox="0 0 24 30" style="enable-background:new 0 0 50 50;" xml:space="preserve">
+     <rect x="0" y="0" width="4" height="10" fill="#333">
+       <animateTransform attributeType="xml"
+         attributeName="transform" type="translate"
+         values="0 0; 0 20; 0 0"
+         begin="0" dur="1s" repeatCount="indefinite" />
+     </rect>
+     <rect x="10" y="0" width="4" height="10" fill="#333">
+       <animateTransform attributeType="xml"
+         attributeName="transform" type="translate"
+         values="0 0; 0 20; 0 0"
+         begin="0.2s" dur="1s" repeatCount="indefinite" />
+     </rect>
+     <rect x="20" y="0" width="4" height="10" fill="#333">
+       <animateTransform attributeType="xml"
+         attributeName="transform" type="translate"
+         values="0 0; 0 20; 0 0"
+         begin="0.4s" dur="1s" repeatCount="indefinite" />
+     </rect>
+   </svg>
+    </div>
+  </div>
+
+
+
+  <script src="{% static 'js/pace.min.js' %}"></script>
+
+  <script>
+    const main_container = document.querySelector('.container')
+    const btn_search = document.querySelector('[data-js="btnSearchPokemon"]')
+    const btn_type = document.querySelector('[data-js="btnType"]')
+    const btn_home = document.querySelector('[data-js="btnHome"]')
+    const loader_general = document.querySelector('.loader-general')
+    const types_container = document.querySelector('[data-js="types_container"]')
+
+    function load_page(){
+      load_pokemon()
+    }
+
+    function search_input_load(){
+      btn_search.classList.add('active')
+      load_pokemon()
+    }
+
+    function go_to_home(){
+      btn_home.classList.add('active')
+      load_pokemon()
+    }
+
+    function to_top(){
+      scrollTo(0,0)
+    }
+
+    function load_pokemon(){
+      main_container.style.opacity = '0.5'
+      loader_general.classList.add('active')
+      setTimeout(() => {
+        main_container.style.opacity = '1'
+        loader_general.classList.remove('active')
+      }, 5000);
+    }
+
+    function show_hide_types(){
+      btn_type.classList.toggle('active')
+      types_container.classList.toggle('inactive')
+    }
+
+  </script>
+</body>
+</html>

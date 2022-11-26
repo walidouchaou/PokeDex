@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  <title>Pokedex</title>
+{% endblock %}
+
+{% block pokemons_found %}
+  <p class="results-found">Results: <b>{{pokemonsList.paginator.count}}</b></p>
+{% endblock %}
